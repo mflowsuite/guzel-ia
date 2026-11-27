@@ -1,0 +1,343 @@
+# Arma index.html: toma los estilos base y el badge de MflowSuite de la guía de filmación (C:\dev\videos-guzel)
+# y genera los dos cuestionarios desde las listas de abajo. Uso: python build.py
+import html
+import re
+
+BASE = open(r'C:\dev\videos-guzel\index.html', encoding='utf-8').read()
+base_css = re.search(r'<style>(.*?)</style>', BASE, re.S).group(1)
+badge_html = re.search(r'(<div class="hl-pw-wrap">.*?)</footer>', BASE, re.S).group(1).rstrip()
+badge_js = re.search(r'(setTimeout\(function\(\) \{.*?)</script>', BASE, re.S).group(1).rstrip()
+
+SERVICIO = "Dura:\nCada cuánto volver:\nCuidados después:\nNo se recomienda si:"
+EJ_SERVICIO = ("Dura: 3 a 4 semanas.\nCada cuánto volver: cada 3 o 4 semanas.\n"
+               "Cuidados después: no maquillar ni tomar sol en la zona por 24 horas.\n"
+               "No se recomienda si: la piel está irritada o lastimada.")
+
+# (id, pregunta, ayuda, ejemplo, esqueleto)
+DIRECCION = [
+    ("La historia", "Lo que ya sabemos por la web actual: empezaron en 2015, fueron el primer brow bar de Argentina, «Guzel» significa belleza en turco y las fundadoras son Rita y Carola. Falta esto:", [
+        ("d-primer-local", "¿Dónde abrió el primer local y cómo fue creciendo Guzel?", "Con fechas aproximadas alcanza.",
+         "El primer local abrió en 2015 en Palermo. En 2018 ya éramos 5 y hoy somos 14, en Capital, Gran Buenos Aires y Tucumán.", ""),
+        ("d-idea", "¿Cómo nació la idea?", "Dos o tres líneas, como se lo contarías a una clienta.",
+         "Rita conoció el threading viviendo afuera y vio que en Argentina no existía un lugar dedicado solo a las cejas. Con Carola armaron el primer local.", ""),
+    ]),
+    ("El equipo", "", [
+        ("d-equipo", "¿Cuántas profesionales trabajan hoy en Guzel?", "Un número aproximado.",
+         "Unas 60 entre las 14 sucursales.", ""),
+        ("d-formacion", "¿Cómo se forma una profesional antes de atender?", "Cuánto dura la capacitación y quién la da.",
+         "Todas pasan por una capacitación interna de 3 meses, con práctica supervisada, antes de atender a una clienta.", ""),
+        ("d-referente", "¿A quién podemos citar como experta de Guzel?", "Nombre, cargo y años de experiencia. Las IA confían más en un texto cuando lo firma una persona.",
+         "María Pérez, jefa de capacitación, 9 años haciendo threading.", ""),
+    ]),
+    ("Cada servicio", "Ya tenemos el nombre, el precio y los minutos de cada uno. Falta lo que solo ustedes saben. En cada casilla podés tocar «Poner la estructura» y completar.", [
+        ("d-s-perfilado", "Perfilado de cejas con hilo", "", EJ_SERVICIO, SERVICIO),
+        ("d-s-laminado", "Laminado de cejas", "", "", SERVICIO),
+        ("d-s-alisado", "Alisado de cejas", "", "", SERVICIO),
+        ("d-s-tinte-cejas", "Tinte de cejas", "", "", SERVICIO),
+        ("d-s-decoloracion", "Decoloración", "", "", SERVICIO),
+        ("d-s-lifting", "Lifting de pestañas", "", "", SERVICIO),
+        ("d-s-tinte-pestanas", "Tinte de pestañas", "", "", SERVICIO),
+        ("d-s-shock", "Shock de nutrición (cejas y pestañas)", "", "", SERVICIO),
+        ("d-s-rostro", "Bozo, mentón y rostro completo con hilo", "", "", SERVICIO),
+    ]),
+    ("Por qué Guzel", "", [
+        ("d-hilo", "¿Por qué hilo y no cera o pinza?", "Las ventajas que le explican a una clienta nueva.",
+         "El hilo saca el vello de raíz sin tirar de la piel, así que no irrita ni mancha. Permite definir la forma con más precisión que la cera.", ""),
+        ("d-refectocil", "¿Por qué trabajan con RefectoCil?", "",
+         "Es la marca profesional que usan los salones de Europa. Los tintes duran más y están probados para la zona de los ojos.", ""),
+        ("d-valoran", "¿Qué es lo que más valoran las clientas?", "Lo que más escuchan en el local.",
+         "Que no hace falta turno, que en 10 minutos están listas y que el resultado se ve natural.", ""),
+        ("d-edad", "¿Atienden a menores y a hombres? ¿Con alguna condición?", "",
+         "Atendemos a hombres en todas las sucursales. A menores de 16, con un adulto que acompañe.", ""),
+    ]),
+    ("Prensa y aclaraciones", "", [
+        ("d-prensa", "Notas, premios o menciones de Guzel", "Pegá los links que tengas. Si no hay, dejalo vacío.",
+         "Nota en La Nación, 2019: https://…", ""),
+        ("d-no-decir", "¿Hay algo que no hay que decir de Guzel, o que la gente suele confundir?", "",
+         "No hacemos extensiones de pestañas ni microblading. No somos una depiladora: solo trabajamos el rostro.", ""),
+    ]),
+]
+
+MARKETING = [
+    ("La marca", "", [
+        ("m-nombres", "¿Cómo nombra la marca cada servicio? ¿Qué palabras no se usan?", "",
+         "Decimos «perfilado con hilo», nunca «depilación de cejas». Decimos «clientas y clientes», no «pacientes».", ""),
+        ("m-frase", "¿Cómo describen a Guzel en una frase?", "La que usarían en la biografía de Instagram.",
+         "El primer brow bar de Argentina: cejas y pestañas en 10 minutos, sin turno.", ""),
+        ("m-tono", "¿Cómo le habla Guzel a su público?", "",
+         "De vos, cercano y simple. Sin tecnicismos y sin diminutivos.", ""),
+    ]),
+    ("Lo que ya existe", "Las IA no leen solo la web: también miran redes, videos y notas. Todo lo que ya esté publicado suma.", [
+        ("m-cuentas", "Cuentas oficiales", "Instagram, TikTok, YouTube, Facebook y cualquier otra. Con el link.",
+         "Instagram: https://instagram.com/…\nTikTok: https://tiktok.com/@…", ""),
+        ("m-videos", "Videos o posteos donde se explique un servicio", "Los que mejor funcionaron. Con el link.",
+         "Reel «Qué es el laminado de cejas»: https://…", ""),
+        ("m-colaboraciones", "Colaboraciones, influencers o notas donde aparezca Guzel", "",
+         "Colaboración con @… en marzo de 2026: https://…", ""),
+    ]),
+    ("Pruebas", "", [
+        ("m-testimonios", "Testimonios o reseñas que se puedan citar", "El texto y el nombre de pila. Tres o cuatro alcanzan.",
+         "«Entré sin turno y en 10 minutos salí con las cejas perfectas.» Sofía, Palermo.", ""),
+        ("m-fotos", "Fotos de antes y después", "No hace falta subirlas acá: pegá el link a la carpeta donde están.",
+         "Carpeta de Drive: https://…", ""),
+    ]),
+    ("Lo que buscan las clientas", "", [
+        ("m-preguntas", "¿Qué preguntan más por Instagram o en los comentarios?", "Ya tenemos las preguntas que le hacen a Sofi. Sumá las que veas vos en redes.",
+         "Si duele, cuánto dura el laminado y si pueden ir embarazadas.", ""),
+        ("m-zonas", "¿Hay sucursales o servicios que quieran empujar más?", "",
+         "Las dos sucursales nuevas y el lifting de pestañas.", ""),
+    ]),
+]
+
+
+def esc(t):
+    return html.escape(t, quote=True)
+
+
+def campo(q):
+    qid, preg, ayuda, ej, esq = q
+    out = [f'<div class="q reveal">', f'<label for="{qid}">{esc(preg)}</label>']
+    if ayuda:
+        out.append(f'<p class="hint">{esc(ayuda)}</p>')
+    if ej:
+        out.append(f'<div class="ej"><span>Ejemplo</span><p>{esc(ej).replace(chr(10), "<br>")}</p></div>')
+    filas = 5 if esq else 3
+    out.append(f'<textarea id="{qid}" rows="{filas}" data-q="{esc(preg)}"{f" data-esq=\"{esc(esq)}\"" if esq else ""} placeholder="Tu respuesta"></textarea>')
+    if esq:
+        out.append('<button type="button" class="mini" data-esq-btn>Poner la estructura</button>')
+    out.append('</div>')
+    return '\n'.join(out)
+
+
+def cuestionario(fid, titulo, kicker, intro, grupos, archivo):
+    out = [f'<section class="form" id="{fid}" data-form="{fid}" data-archivo="{archivo}" data-titulo="{esc(titulo)}">', '<div class="wrap narrow">',
+           f'<p class="kicker reveal">{esc(kicker)}</p>', '<div class="rule"></div>', f'<h2 class="reveal">{esc(titulo)}</h2>',
+           f'<p class="lead reveal" style="margin-top:18px">{esc(intro)}</p>']
+    for nombre, nota, qs in grupos:
+        out.append(f'<h3 class="grupo reveal" data-grupo="{esc(nombre)}">{esc(nombre)}</h3>')
+        if nota:
+            out.append(f'<p class="nota reveal">{esc(nota)}</p>')
+        out += [campo(q) for q in qs]
+    out.append('''<div class="acciones reveal">
+  <p class="cuenta" aria-live="polite"><b data-n>0</b> de <span data-t>0</span> respondidas <span class="ok" data-ok hidden>· Guardado</span></p>
+  <div class="botones">
+    <button type="button" class="btn" data-bajar>Descargar mis respuestas</button>
+    <button type="button" class="btn alt" data-copiar>Copiar todo</button>
+  </div>
+  <p class="hint">La descarga es un archivo de Word con las preguntas y lo que escribiste. También lo podés bajar vacío, completarlo ahí y mandarlo después.</p>
+</div>''')
+    out.append('</div></section>')
+    return '\n'.join(out)
+
+
+CSS = '''
+  /* Página de datos para las IA */
+  .wrap.narrow { width: min(820px, 100% - 32px); }
+  .hero.small { min-height: 68svh; }
+  .hero.small .content { padding-top: 120px; }
+  .hero .poster { object-position: 62% 40%; }
+  .marcha { margin-top: 44px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; counter-reset: m; }
+  .marcha .card { counter-increment: m; background: #fff; border: 1px solid var(--line); border-radius: 22px; padding: 26px 24px; }
+  .marcha .card .st { display: inline-block; padding: 3px 12px; border-radius: 999px; font-size: .72rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; background: var(--teal); color: var(--ink); }
+  .marcha .card .st.falta { background: var(--pink); }
+  .marcha .card h3 { margin-top: 14px; }
+  .marcha .card p { margin-top: 8px; color: var(--ash); }
+  .como { background: var(--cream); }
+  .pasos { margin: 32px 0 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; counter-reset: p; }
+  .pasos li { counter-increment: p; background: #fff; border-radius: 20px; padding: 22px; color: var(--ash); }
+  .pasos li::before { content: counter(p); display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: var(--teal-deep); color: #fff; font-weight: 700; margin-bottom: 12px; }
+  .pasos b { color: var(--ink); display: block; }
+  .quien { margin-top: 32px; display: flex; flex-wrap: wrap; gap: 12px; }
+  .form + .form { background: var(--cream); }
+  .form .grupo { margin-top: 56px; font-size: 1.6rem; padding-top: 22px; border-top: 1px solid var(--line); }
+  .form .nota { margin-top: 10px; color: var(--ash); }
+  .q { margin-top: 28px; }
+  .q label { display: block; font-weight: 700; font-size: 1.08rem; line-height: 1.35; }
+  .hint { margin-top: 4px; color: var(--ash); font-size: .93rem; }
+  .ej { margin-top: 12px; padding: 12px 16px; border-left: 4px solid var(--teal); background: #fff; border-radius: 0 12px 12px 0; }
+  .form + .form .ej { background: var(--paper); }
+  .ej span { font-size: .7rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--teal-deep); }
+  .ej p { margin-top: 2px; color: var(--ash); font-style: italic; font-size: .97rem; }
+  textarea { display: block; width: 100%; margin-top: 12px; padding: 14px 16px; border-radius: 16px; border: 1px solid #cfc7b8; background: #fff; font: inherit; color: var(--ink); resize: vertical; min-height: 96px; }
+  textarea:focus-visible { outline: 3px solid var(--teal); outline-offset: 1px; border-color: var(--teal-deep); }
+  .mini { margin-top: 8px; min-height: 40px; padding: 0 16px; border-radius: 999px; border: 1px solid var(--teal-deep); background: transparent; color: var(--teal-deep); font: inherit; font-weight: 700; font-size: .9rem; cursor: pointer; }
+  .acciones { margin-top: 56px; padding: 26px; border-radius: 24px; background: #fff; border: 1px solid var(--line); position: sticky; bottom: 12px; box-shadow: 0 18px 40px -24px rgba(0,0,0,.4); }
+  .cuenta { font-weight: 600; }
+  .cuenta b { font-family: var(--display); font-weight: 400; font-size: 1.7rem; color: var(--teal-deep); }
+  .cuenta .ok { color: var(--teal-deep); }
+  .botones { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 10px; }
+  button.btn { border: 0; font: inherit; font-weight: 700; cursor: pointer; }
+  .btn.alt { background: transparent; color: var(--teal-deep); box-shadow: inset 0 0 0 2px var(--teal-deep); }
+  .aviso { margin-top: 26px; padding: 14px 18px; border-radius: 14px; background: #fff; border: 1px dashed #cfc7b8; color: var(--ash); font-size: .95rem; }
+  @media (max-width: 900px) { .marcha, .pasos { grid-template-columns: 1fr; } }
+  @media (max-width: 560px) {
+    .acciones { padding: 18px; position: static; }
+    .botones .btn { width: 100%; justify-content: center; }
+    .quien .btn { width: 100%; justify-content: center; }
+  }
+'''
+
+JS = r'''
+  // Cuestionarios: cada respuesta se guarda sola en este navegador (localStorage). Nada sale de acá
+  // hasta que la persona descarga o copia sus respuestas y las manda.
+  (function () {
+    var KEY = 'guzel-ia:';
+    function leer(id) { try { return localStorage.getItem(KEY + id) || ''; } catch (e) { return ''; } }
+    function guardar(id, v) { try { v ? localStorage.setItem(KEY + id, v) : localStorage.removeItem(KEY + id); return true; } catch (e) { return false; } }
+    function esc(t) { return t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+    document.querySelectorAll('[data-form]').forEach(function (form) {
+      var campos = [].slice.call(form.querySelectorAll('textarea'));
+      var n = form.querySelector('[data-n]'), ok = form.querySelector('[data-ok]'), t;
+      form.querySelector('[data-t]').textContent = campos.length;
+      function contar() { n.textContent = campos.filter(function (c) { var v = c.value.trim(); return v && v !== (c.dataset.esq || '').trim(); }).length; }
+      campos.forEach(function (c) {
+        c.value = leer(c.id);
+        c.addEventListener('input', function () {
+          var listo = guardar(c.id, c.value);
+          contar(); ok.hidden = !listo; clearTimeout(t); t = setTimeout(function () { ok.hidden = true; }, 2500);
+        });
+      });
+      contar();
+      form.querySelectorAll('[data-esq-btn]').forEach(function (b) {
+        b.addEventListener('click', function () {
+          var c = b.previousElementSibling;
+          if (!c.value.trim()) { c.value = c.dataset.esq; c.dispatchEvent(new Event('input')); }
+          c.focus();
+        });
+      });
+
+      // Recorre grupos y preguntas en orden: sirve para el texto a copiar y para el Word.
+      function recorrer(fn) {
+        form.querySelectorAll('[data-grupo], textarea').forEach(function (el) {
+          el.dataset.grupo ? fn('g', el.dataset.grupo) : fn('q', el.dataset.q, el.value.trim());
+        });
+      }
+      form.querySelector('[data-copiar]').addEventListener('click', function (e) {
+        var txt = 'GUZEL · ' + form.dataset.titulo + '\n';
+        recorrer(function (k, a, b) { txt += k === 'g' ? '\n== ' + a + ' ==\n' : '\n' + a + '\n' + (b || '(sin responder)') + '\n'; });
+        var btn = e.currentTarget, fin = function (m) { btn.textContent = m; setTimeout(function () { btn.textContent = 'Copiar todo'; }, 2500); };
+        if (navigator.clipboard) navigator.clipboard.writeText(txt).then(function () { fin('Copiado'); }, function () { fin('No se pudo copiar'); });
+        else fin('No se pudo copiar');
+      });
+      form.querySelector('[data-bajar]').addEventListener('click', function () {
+        var h = '<html><head><meta charset="utf-8"><title>Guzel</title></head><body style="font-family:Calibri,Arial,sans-serif">' +
+          '<h1>Guzel · ' + esc(form.dataset.titulo) + '</h1>';
+        recorrer(function (k, a, b) {
+          h += k === 'g' ? '<h2>' + esc(a) + '</h2>' : '<p><b>' + esc(a) + '</b></p><p>' + (b ? esc(b).replace(/\n/g, '<br>') : '&nbsp;<br>&nbsp;') + '</p>';
+        });
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob(['\ufeff' + h + '</body></html>'], { type: 'application/msword' }));
+        a.download = form.dataset.archivo; document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+      });
+    });
+  })();
+'''
+
+page = f'''<!doctype html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guzel · Que las IA recomienden a Guzel</title>
+<meta name="description" content="Qué estamos haciendo para que ChatGPT, Gemini y Google recomienden a Guzel, y qué datos necesitamos.">
+<meta name="robots" content="noindex">
+<meta property="og:title" content="Que las IA recomienden a Guzel">
+<meta property="og:description" content="Qué ya está en marcha y qué datos necesitamos de ustedes.">
+<meta property="og:image" content="https://mflowsuite.github.io/guzel-ia/img/og.jpg">
+<link rel="icon" href="favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400&family=Quicksand:wght@400;500;600;700&family=Fira+Sans:wght@600&display=swap" rel="stylesheet">
+<style>{base_css}{CSS}</style>
+</head>
+<body>
+
+<header class="hero small">
+  <img class="poster" src="img/resultado-d.webp" alt="">
+  <div class="top"><div class="wrap">
+    <img class="logo" src="img/logo.png" alt="Guzel" width="120" height="56">
+    <span class="tag">Guzel y las IA</span>
+  </div></div>
+  <div class="content wrap">
+    <h1>Que las IA <em>recomienden</em> a Guzel</h1>
+    <p>Cada vez más gente le pregunta a ChatGPT o a Gemini dónde hacerse las cejas. Esto es lo que ya está en marcha y lo que necesitamos de ustedes.</p>
+    <div class="ctas">
+      <a class="btn" href="#direccion">Soy de dirección ↓</a>
+      <a class="btn ghost" href="#marketing">Soy de marketing ↓</a>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<section id="marcha">
+  <div class="wrap">
+    <p class="kicker reveal">Cómo eligen las IA a quién recomendar</p>
+    <div class="rule"></div>
+    <h2 class="reveal">Cuatro cosas, y tres ya están en marcha</h2>
+    <p class="lead reveal" style="margin-top:18px">Una IA recomienda a quien puede leer, a quien tiene buenas reseñas y a quien responde con datos concretos lo que la gente pregunta.</p>
+    <div class="marcha">
+      <div class="card reveal"><span class="st">En marcha</span><h3>Una web que las IA pueden leer</h3><p>La web nueva tiene cada página también en texto simple, pensado para las IA. Los precios, los horarios y las sucursales se actualizan solos desde el panel, así que siempre leen el dato del día.</p></div>
+      <div class="card reveal"><span class="st">En marcha</span><h3>Reseñas en Google de cada sucursal</h3><p>Después de cada visita, el programa de fidelización le pregunta a la clienta cómo le fue y la invita a dejar su reseña. Ya está sumando reseñas en cada sucursal, y lo que salió mal les llega primero a ustedes.</p></div>
+      <div class="card reveal"><span class="st">En marcha</span><h3>Las preguntas reales de las clientas</h3><p>Sofi responde todos los días por WhatsApp, Instagram y la web. De esas conversaciones sale la lista de lo que la gente de verdad pregunta, sin nombres ni datos personales. La guía responde eso.</p></div>
+      <div class="card reveal"><span class="st falta">Falta</span><h3>Lo que solo ustedes saben</h3><p>Cuánto dura un laminado, qué cuidados lleva, cómo se forma una profesional. Con esos datos armamos la guía de cejas y pestañas de Guzel, que es lo que las IA citan cuando alguien pregunta.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="como" id="como">
+  <div class="wrap">
+    <p class="kicker reveal">Cómo completar</p>
+    <div class="rule"></div>
+    <h2 class="reveal">No hace falta hacerlo de una vez</h2>
+    <ol class="pasos">
+      <li class="reveal"><b>Respondé lo que sepas</b>Cada pregunta trae un ejemplo. Corto y como lo dirías hablando está perfecto.</li>
+      <li class="reveal"><b>Se guarda solo</b>Lo que escribís queda guardado en este celular o compu. Podés cerrar y seguir otro día desde el mismo dispositivo.</li>
+      <li class="reveal"><b>Mandáselo a Martín</b>Al final descargás tus respuestas en Word, o las copiás, y se las mandás por WhatsApp o mail.</li>
+    </ol>
+    <p class="aviso reveal">Los ejemplos son inventados, solo para mostrar cómo responder. No son datos reales de Guzel. Lo que no sepas, dejalo vacío.</p>
+    <div class="quien reveal">
+      <a class="btn" href="#direccion">Preguntas para dirección</a>
+      <a class="btn" href="#marketing">Preguntas para marketing</a>
+    </div>
+  </div>
+</section>
+
+{cuestionario("direccion", "Preguntas para dirección", "Para Caro y Rita", "Son datos del negocio que no están en ningún lado y que solo ustedes pueden confirmar.", DIRECCION, "guzel-direccion.doc")}
+
+{cuestionario("marketing", "Preguntas para marketing", "Para quien maneja la marca", "Todo lo que ya tengan publicado o armado sirve. Si hay más material del que entra acá, mejor: mandalo igual.", MARKETING, "guzel-marketing.doc")}
+
+<section class="resumen">
+  <div class="wrap">
+    <p class="kicker reveal">Además</p>
+    <div class="rule"></div>
+    <h2 class="reveal">Los videos de la web nueva</h2>
+    <p class="lead reveal" style="margin-top:18px;color:rgba(255,255,255,.85)">La guía de filmación explica qué tomas necesitamos, cómo filmarlas y por qué.</p>
+    <a class="btn reveal" href="https://mflowsuite.github.io/videos-guzel/">Ver la guía de filmación →</a>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <p>Guzel y las IA · Datos para la web nueva</p>
+{badge_html}
+</footer>
+
+<script>
+  // Aparición suave de cada bloque al entrar en pantalla.
+  var io = new IntersectionObserver(function (es) {{
+    es.forEach(function (e) {{ if (e.isIntersecting) {{ e.target.classList.add('in'); io.unobserve(e.target); }} }});
+  }}, {{ threshold: 0.08 }});
+  document.querySelectorAll('.reveal').forEach(function (el) {{ io.observe(el); }});
+{JS}
+{badge_js}
+</script>
+</body>
+</html>
+'''
+open('index.html', 'w', encoding='utf-8', newline='\n').write(page)
+n = lambda g: sum(len(q) for _, _, q in g)
+print(len(page), 'bytes ·', n(DIRECCION), 'preguntas dirección ·', n(MARKETING), 'preguntas marketing')
