@@ -73,19 +73,12 @@
         });
       });
 
-      // Recorre grupos y preguntas en orden: sirve para el texto a copiar y para el Word.
+      // Recorre grupos y preguntas en orden, para armar la copia en Word.
       function recorrer(fn) {
         form.querySelectorAll('[data-grupo], textarea').forEach(function (el) {
           el.dataset.grupo ? fn('g', el.dataset.grupo) : fn('q', el.dataset.q, el.value.trim());
         });
       }
-      form.querySelector('[data-copiar]').addEventListener('click', function (e) {
-        var txt = 'GUZEL · ' + form.dataset.titulo + '\n';
-        recorrer(function (k, a, b) { txt += k === 'g' ? '\n== ' + a + ' ==\n' : '\n' + a + '\n' + (b || '(sin responder)') + '\n'; });
-        var btn = e.currentTarget, fin = function (m) { btn.textContent = m; setTimeout(function () { btn.textContent = 'Copiar todo'; }, 2500); };
-        if (navigator.clipboard) navigator.clipboard.writeText(txt).then(function () { fin('Copiado'); }, function () { fin('No se pudo copiar'); });
-        else fin('No se pudo copiar');
-      });
       form.querySelector('[data-bajar]').addEventListener('click', function () {
         var h = '<html><head><meta charset="utf-8"><title>Guzel</title></head><body style="font-family:Calibri,Arial,sans-serif">' +
           '<h1>Guzel · ' + esc(form.dataset.titulo) + '</h1>';

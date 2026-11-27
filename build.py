@@ -120,11 +120,8 @@ def cuestionario(fid, titulo, kicker, intro, grupos, archivo):
         out += [campo(q) for q in qs]
     out.append('''<div class="acciones reveal">
   <p class="cuenta" aria-live="polite"><b data-n>0</b> de <span data-t>0</span> respondidas <span class="ok" data-ok hidden></span></p>
-  <div class="botones">
-    <button type="button" class="btn" data-bajar>Descargar mis respuestas</button>
-    <button type="button" class="btn alt" data-copiar>Copiar todo</button>
-  </div>
-  <p class="hint">No hace falta enviar nada: se guarda solo. La descarga es una copia en Word con las preguntas y las respuestas, por si la querés tener.</p>
+  <p class="hint">No hace falta enviar nada: se guarda solo y Martín lo ve a medida que se completa.</p>
+  <button type="button" class="copia" data-bajar>Descargar una copia en Word</button>
 </div>''')
     out.append('</div></section>')
     return '\n'.join(out)
@@ -167,14 +164,11 @@ CSS = '''
   .cuenta { font-weight: 600; }
   .cuenta b { font-family: var(--display); font-weight: 400; font-size: 1.7rem; color: var(--teal-deep); }
   .cuenta .ok { color: var(--teal-deep); }
-  .botones { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 10px; }
-  button.btn { border: 0; font: inherit; font-weight: 700; cursor: pointer; }
-  .btn.alt { background: transparent; color: var(--teal-deep); box-shadow: inset 0 0 0 2px var(--teal-deep); }
+  .copia { margin-top: 10px; padding: 8px 0; border: 0; background: none; font: inherit; font-size: .9rem; font-weight: 600; color: var(--teal-deep); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
   .aviso { margin-top: 26px; padding: 14px 18px; border-radius: 14px; background: #fff; border: 1px dashed #cfc7b8; color: var(--ash); font-size: .95rem; }
   @media (max-width: 900px) { .marcha, .pasos { grid-template-columns: 1fr; } }
   @media (max-width: 560px) {
     .acciones { padding: 18px; position: static; }
-    .botones .btn { width: 100%; justify-content: center; }
     .quien .btn { width: 100%; justify-content: center; }
   }
 '''
