@@ -1,0 +1,6 @@
+{
+  "name": "guzel-datos",
+  "private": true,
+  "type": "module",
+  "devDependencies": { "cf": "latest", "wrangler": "latest" }
+}

@@ -1,2 +1,5 @@
 _t.html
 _f.html
+node_modules/
+.wrangler/
+.cloudflare/

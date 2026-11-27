@@ -119,12 +119,12 @@ def cuestionario(fid, titulo, kicker, intro, grupos, archivo):
             out.append(f'<p class="nota reveal">{esc(nota)}</p>')
         out += [campo(q) for q in qs]
     out.append('''<div class="acciones reveal">
-  <p class="cuenta" aria-live="polite"><b data-n>0</b> de <span data-t>0</span> respondidas <span class="ok" data-ok hidden>· Guardado</span></p>
+  <p class="cuenta" aria-live="polite"><b data-n>0</b> de <span data-t>0</span> respondidas <span class="ok" data-ok hidden></span></p>
   <div class="botones">
     <button type="button" class="btn" data-bajar>Descargar mis respuestas</button>
     <button type="button" class="btn alt" data-copiar>Copiar todo</button>
   </div>
-  <p class="hint">La descarga es un archivo de Word con las preguntas y lo que escribiste. También lo podés bajar vacío, completarlo ahí y mandarlo después.</p>
+  <p class="hint">No hace falta enviar nada: se guarda solo. La descarga es una copia en Word con las preguntas y las respuestas, por si la querés tener.</p>
 </div>''')
     out.append('</div></section>')
     return '\n'.join(out)
@@ -142,6 +142,8 @@ CSS = '''
   .marcha .card .st.falta { background: var(--pink); }
   .marcha .card h3 { margin-top: 14px; }
   .marcha .card p { margin-top: 8px; color: var(--ash); }
+  .marcha .card .con { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line); display: flex; align-items: center; gap: 8px; font-size: .88rem; }
+  .marcha .card .con b { color: var(--ink); }
   .como { background: var(--cream); }
   .pasos { margin: 32px 0 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; counter-reset: p; }
   .pasos li { counter-increment: p; background: #fff; border-radius: 20px; padding: 22px; color: var(--ash); }
@@ -177,63 +179,7 @@ CSS = '''
   }
 '''
 
-JS = r'''
-  // Cuestionarios: cada respuesta se guarda sola en este navegador (localStorage). Nada sale de acá
-  // hasta que la persona descarga o copia sus respuestas y las manda.
-  (function () {
-    var KEY = 'guzel-ia:';
-    function leer(id) { try { return localStorage.getItem(KEY + id) || ''; } catch (e) { return ''; } }
-    function guardar(id, v) { try { v ? localStorage.setItem(KEY + id, v) : localStorage.removeItem(KEY + id); return true; } catch (e) { return false; } }
-    function esc(t) { return t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
-
-    document.querySelectorAll('[data-form]').forEach(function (form) {
-      var campos = [].slice.call(form.querySelectorAll('textarea'));
-      var n = form.querySelector('[data-n]'), ok = form.querySelector('[data-ok]'), t;
-      form.querySelector('[data-t]').textContent = campos.length;
-      function contar() { n.textContent = campos.filter(function (c) { var v = c.value.trim(); return v && v !== (c.dataset.esq || '').trim(); }).length; }
-      campos.forEach(function (c) {
-        c.value = leer(c.id);
-        c.addEventListener('input', function () {
-          var listo = guardar(c.id, c.value);
-          contar(); ok.hidden = !listo; clearTimeout(t); t = setTimeout(function () { ok.hidden = true; }, 2500);
-        });
-      });
-      contar();
-      form.querySelectorAll('[data-esq-btn]').forEach(function (b) {
-        b.addEventListener('click', function () {
-          var c = b.previousElementSibling;
-          if (!c.value.trim()) { c.value = c.dataset.esq; c.dispatchEvent(new Event('input')); }
-          c.focus();
-        });
-      });
-
-      // Recorre grupos y preguntas en orden: sirve para el texto a copiar y para el Word.
-      function recorrer(fn) {
-        form.querySelectorAll('[data-grupo], textarea').forEach(function (el) {
-          el.dataset.grupo ? fn('g', el.dataset.grupo) : fn('q', el.dataset.q, el.value.trim());
-        });
-      }
-      form.querySelector('[data-copiar]').addEventListener('click', function (e) {
-        var txt = 'GUZEL · ' + form.dataset.titulo + '\n';
-        recorrer(function (k, a, b) { txt += k === 'g' ? '\n== ' + a + ' ==\n' : '\n' + a + '\n' + (b || '(sin responder)') + '\n'; });
-        var btn = e.currentTarget, fin = function (m) { btn.textContent = m; setTimeout(function () { btn.textContent = 'Copiar todo'; }, 2500); };
-        if (navigator.clipboard) navigator.clipboard.writeText(txt).then(function () { fin('Copiado'); }, function () { fin('No se pudo copiar'); });
-        else fin('No se pudo copiar');
-      });
-      form.querySelector('[data-bajar]').addEventListener('click', function () {
-        var h = '<html><head><meta charset="utf-8"><title>Guzel</title></head><body style="font-family:Calibri,Arial,sans-serif">' +
-          '<h1>Guzel · ' + esc(form.dataset.titulo) + '</h1>';
-        recorrer(function (k, a, b) {
-          h += k === 'g' ? '<h2>' + esc(a) + '</h2>' : '<p><b>' + esc(a) + '</b></p><p>' + (b ? esc(b).replace(/\n/g, '<br>') : '&nbsp;<br>&nbsp;') + '</p>';
-        });
-        var a = document.createElement('a');
-        a.href = URL.createObjectURL(new Blob(['\ufeff' + h + '</body></html>'], { type: 'application/msword' }));
-        a.download = form.dataset.archivo; document.body.appendChild(a); a.click(); a.remove();
-        setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
-      });
-    });
-  })();
-'''
+JS = open('cliente.js', encoding='utf-8').read()
 
 page = f'''<!doctype html>
 <html lang="es-AR">
@@ -280,8 +226,8 @@ page = f'''<!doctype html>
     <p class="lead reveal" style="margin-top:18px">Una IA recomienda a quien puede leer, a quien tiene buenas reseñas y a quien responde con datos concretos lo que la gente pregunta.</p>
     <div class="marcha">
       <div class="card reveal"><span class="st">En marcha</span><h3>Una web que las IA pueden leer</h3><p>La web nueva tiene cada página también en texto simple, pensado para las IA. Los precios, los horarios y las sucursales se actualizan solos desde el panel, así que siempre leen el dato del día.</p></div>
-      <div class="card reveal"><span class="st">En marcha</span><h3>Reseñas en Google de cada sucursal</h3><p>Después de cada visita, el programa de fidelización le pregunta a la clienta cómo le fue y la invita a dejar su reseña. Ya está sumando reseñas en cada sucursal, y lo que salió mal les llega primero a ustedes.</p></div>
-      <div class="card reveal"><span class="st">En marcha</span><h3>Las preguntas reales de las clientas</h3><p>Sofi responde todos los días por WhatsApp, Instagram y la web. De esas conversaciones sale la lista de lo que la gente de verdad pregunta, sin nombres ni datos personales. La guía responde eso.</p></div>
+      <div class="card reveal"><span class="st">En marcha</span><h3>Reseñas en Google de cada sucursal</h3><p>Después de cada visita, el programa de fidelización le pregunta a la clienta cómo le fue y la invita a dejar su reseña. Ya está sumando reseñas en cada sucursal, y lo que salió mal les llega primero a ustedes.</p><p class="con"><img src="img/recompensalo.svg" alt="" width="22" height="22">Con <b>Recompensalo</b>, de MflowSuite</p></div>
+      <div class="card reveal"><span class="st">En marcha</span><h3>Las preguntas reales de las clientas</h3><p>Sofi responde todos los días por WhatsApp, Instagram y la web. De esas conversaciones sale la lista de lo que la gente de verdad pregunta, sin nombres ni datos personales. La guía responde eso.</p><p class="con"><img src="img/respondelo.svg" alt="" width="22" height="22">Con <b>Respondelo</b>, de MflowSuite</p></div>
       <div class="card reveal"><span class="st falta">Falta</span><h3>Lo que solo ustedes saben</h3><p>Cuánto dura un laminado, qué cuidados lleva, cómo se forma una profesional. Con esos datos armamos la guía de cejas y pestañas de Guzel, que es lo que las IA citan cuando alguien pregunta.</p></div>
     </div>
   </div>
@@ -294,10 +240,10 @@ page = f'''<!doctype html>
     <h2 class="reveal">No hace falta hacerlo de una vez</h2>
     <ol class="pasos">
       <li class="reveal"><b>Respondé lo que sepas</b>Cada pregunta trae un ejemplo. Corto y como lo dirías hablando está perfecto.</li>
-      <li class="reveal"><b>Se guarda solo</b>Lo que escribís queda guardado en este celular o compu. Podés cerrar y seguir otro día desde el mismo dispositivo.</li>
-      <li class="reveal"><b>Mandáselo a Martín</b>Al final descargás tus respuestas en Word, o las copiás, y se las mandás por WhatsApp o mail.</li>
+      <li class="reveal"><b>Se guarda solo, para todas</b>Lo que escribís lo ve cualquiera que abra este link. Podés seguir otro día, desde otro celular o compu, y otra persona puede completar lo que falte.</li>
+      <li class="reveal"><b>No hay que mandar nada</b>Martín ve las respuestas a medida que se completan. Si querés una copia, al final la podés descargar en Word.</li>
     </ol>
-    <p class="aviso reveal">Los ejemplos son inventados, solo para mostrar cómo responder. No son datos reales de Guzel. Lo que no sepas, dejalo vacío.</p>
+    <p class="aviso reveal">Los ejemplos son inventados, solo para mostrar cómo responder. No son datos reales de Guzel. Lo que no sepas, dejalo vacío. Si dos personas escriben la misma respuesta a la vez, queda la última.</p>
     <div class="quien reveal">
       <a class="btn" href="#direccion">Preguntas para dirección</a>
       <a class="btn" href="#marketing">Preguntas para marketing</a>
