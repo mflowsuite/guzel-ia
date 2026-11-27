@@ -163,6 +163,8 @@
   }
 
   /* Página de datos para las IA */
+  :root { --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1); }
+  [hidden] { display: none !important; }
   .wrap.narrow { width: min(820px, 100% - 32px); }
   .hero.small { min-height: 68svh; }
   .hero.small .content { padding-top: 120px; }
@@ -194,15 +196,57 @@
   textarea { display: block; width: 100%; margin-top: 12px; padding: 14px 16px; border-radius: 16px; border: 1px solid #cfc7b8; background: #fff; font: inherit; color: var(--ink); resize: vertical; min-height: 96px; }
   textarea:focus-visible { outline: 3px solid var(--teal); outline-offset: 1px; border-color: var(--teal-deep); }
   .mini { margin-top: 8px; min-height: 40px; padding: 0 16px; border-radius: 999px; border: 1px solid var(--teal-deep); background: transparent; color: var(--teal-deep); font: inherit; font-weight: 700; font-size: .9rem; cursor: pointer; }
-  .acciones { margin-top: 56px; padding: 26px; border-radius: 24px; background: #fff; border: 1px solid var(--line); position: sticky; bottom: 12px; box-shadow: 0 18px 40px -24px rgba(0,0,0,.4); }
-  .cuenta { font-weight: 600; }
-  .cuenta b { font-family: var(--display); font-weight: 400; font-size: 1.7rem; color: var(--teal-deep); }
-  .cuenta .ok { color: var(--teal-deep); }
-  .copia { margin-top: 10px; padding: 8px 0; border: 0; background: none; font: inherit; font-size: .9rem; font-weight: 600; color: var(--teal-deep); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .form { scroll-margin-top: 56px; }
+  .q { scroll-margin-top: 76px; }
+  .tilde { display: inline-block; width: 22px; height: 22px; margin-left: 8px; vertical-align: -4px; border-radius: 50%; background: var(--teal-deep) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 12.5l4 4 8-9'/%3E%3C/svg%3E") center / 14px no-repeat; opacity: 0; transform: scale(.6); transition: opacity .2s var(--ease-out), transform .2s var(--ease-out); }
+  .q.hecha .tilde { opacity: 1; transform: none; }
+  .q.hecha textarea { border-color: var(--teal); }
+
+  .barra { position: fixed; top: 0; left: 0; right: 0; z-index: 50; background: rgba(255,253,249,.94); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow: 0 8px 24px -18px rgba(0,0,0,.45); transform: translateY(-110%); transition: transform .25s var(--ease-out); }
+  .barra.on { transform: none; }
+  .barra-in { width: min(820px, 100% - 24px); margin-inline: auto; height: 52px; display: flex; align-items: center; gap: 12px; }
+  .tabs { display: flex; gap: 4px; padding: 3px; border-radius: 999px; background: var(--cream); margin-right: auto; }
+  .tabs a { padding: 6px 14px; border-radius: 999px; font-size: .85rem; font-weight: 700; color: var(--ash); text-decoration: none; transition: background-color .2s ease, color .2s ease; }
+  .tabs a.on { background: var(--teal-deep); color: #fff; }
+  .barra-ok { font-size: .82rem; font-weight: 700; color: var(--teal-deep); white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; }
+  .barra-ok::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--teal); }
+  .barra-ok:empty { display: none; }
+  .barra-ok[data-tipo="espera"] { color: var(--ash); }
+  .barra-ok[data-tipo="espera"]::before { background: var(--butter); }
+  .barra-ok[data-tipo="mal"] { color: #a13a2a; }
+  .barra-ok[data-tipo="mal"]::before { background: #e0705c; }
+  .barra-n { font-size: .9rem; font-weight: 600; white-space: nowrap; }
+  .barra-n b { display: inline-block; font-family: var(--display); font-weight: 400; font-size: 1.35rem; color: var(--teal-deep); }
+  .barra-ir { min-height: 36px; padding: 0 14px; border-radius: 999px; border: 0; background: var(--pink); color: var(--ink); font: inherit; font-size: .85rem; font-weight: 700; cursor: pointer; white-space: nowrap; }
+  .barra-linea { height: 4px; background: var(--line); }
+  .barra-linea span { display: block; height: 100%; background: linear-gradient(90deg, var(--teal-deep), var(--teal)); transform: scaleX(0); transform-origin: left; transition: transform .5s var(--ease-in-out); }
+  .barra.completo .barra-linea span { background: linear-gradient(90deg, var(--teal-deep), var(--teal), var(--pink)); }
+
+  .fin { margin-top: 64px; padding: 28px; border-radius: 28px; background: #fff; border: 1px solid var(--line); box-shadow: 0 24px 50px -34px rgba(0,0,0,.4); display: grid; grid-template-columns: auto 1fr; gap: 24px; align-items: center; }
+  .anillo { position: relative; width: 112px; height: 112px; }
+  .anillo svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+  .anillo circle { fill: none; stroke-width: 7; }
+  .anillo .pista { stroke: var(--cream); }
+  .anillo .avance { stroke: var(--teal-deep); stroke-linecap: round; stroke-dasharray: 100; stroke-dashoffset: 100; transition: stroke-dashoffset .6s var(--ease-in-out), stroke .3s ease; }
+  .anillo b { position: absolute; inset: 0; display: grid; place-items: center; font-family: var(--display); font-weight: 400; font-size: 2.4rem; color: var(--teal-deep); }
+  .fin.completo .anillo .avance { stroke: var(--teal); }
+  .fin .cuenta { font-weight: 700; font-size: 1.1rem; }
+  .fin-acc { margin-top: 14px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 18px; }
+  .fin-acc .btn { border: 0; font: inherit; font-weight: 700; cursor: pointer; min-height: 44px; }
+  .copia { padding: 8px 0; border: 0; background: none; font: inherit; font-size: .9rem; font-weight: 600; color: var(--teal-deep); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+  :is(.barra-ir, .copia, .tabs a, .fin-acc .btn):focus-visible { outline: 3px solid var(--teal); outline-offset: 2px; }
+  @media (prefers-reduced-motion: reduce) { .barra, .barra-linea span, .tilde, .anillo .avance { transition-duration: .01s; } }
   .aviso { margin-top: 26px; padding: 14px 18px; border-radius: 14px; background: #fff; border: 1px dashed #cfc7b8; color: var(--ash); font-size: .95rem; }
   @media (max-width: 900px) { .marcha, .pasos { grid-template-columns: 1fr; } }
   @media (max-width: 560px) {
-    .acciones { padding: 18px; position: static; }
+    .fin { grid-template-columns: 1fr; justify-items: center; text-align: center; padding: 24px 20px; }
+    .fin-acc { justify-content: center; }
+    .fin-acc .btn { width: 100%; justify-content: center; }
+    .barra-in { gap: 8px; }
+    .tabs a { padding: 6px 10px; font-size: .78rem; }
+    .barra-ok { font-size: 0; gap: 0; }
+    .barra-ir { padding: 0 10px; font-size: .78rem; }
     .quien .btn { width: 100%; justify-content: center; }
   }
 </style>
@@ -224,6 +268,16 @@
     </div>
   </div>
 </header>
+
+<nav class="barra" id="barra" aria-label="Avance del cuestionario">
+  <div class="barra-in">
+    <div class="tabs"><a href="#direccion" data-tab="direccion">Dirección</a><a href="#marketing" data-tab="marketing">Marketing</a></div>
+    <span class="barra-ok" data-bok aria-hidden="true"></span>
+    <p class="barra-n" aria-hidden="true"><b data-bn></b> de <span data-bt>0</span></p>
+    <button type="button" class="barra-ir" data-ir aria-label="Ir a la primera pregunta sin responder">Falta <span aria-hidden="true">↓</span></button>
+  </div>
+  <div class="barra-linea" aria-hidden="true"><span data-bl></span></div>
+</nav>
 
 <main>
 
@@ -269,32 +323,32 @@
 <h3 class="grupo reveal" data-grupo="La historia">La historia</h3>
 <p class="nota reveal">Lo que ya sabemos por la web actual: empezaron en 2015, fueron el primer brow bar de Argentina, «Guzel» significa belleza en turco y las fundadoras son Rita y Carola. Falta esto:</p>
 <div class="q reveal">
-<label for="d-primer-local">¿Dónde abrió el primer local y cómo fue creciendo Guzel?</label>
+<label for="d-primer-local">¿Dónde abrió el primer local y cómo fue creciendo Guzel?<span class="tilde" aria-hidden="true"></span></label>
 <p class="hint">Con fechas aproximadas alcanza.</p>
 <div class="ej"><span>Ejemplo</span><p>El primer local abrió en 2015 en Palermo. En 2018 ya éramos 5 y hoy somos 14, en Capital, Gran Buenos Aires y Tucumán.</p></div>
 <textarea id="d-primer-local" rows="3" data-q="¿Dónde abrió el primer local y cómo fue creciendo Guzel?" placeholder="Tu respuesta"></textarea>
 </div>
 <div class="q reveal">
-<label for="d-idea">¿Cómo nació la idea?</label>
+<label for="d-idea">¿Cómo nació la idea?<span class="tilde" aria-hidden="true"></span></label>
 <p class="hint">Dos o tres líneas, como se lo contarías a una clienta.</p>
 <div class="ej"><span>Ejemplo</span><p>Rita conoció el threading viviendo afuera y vio que en Argentina no existía un lugar dedicado solo a las cejas. Con Carola armaron el primer local.</p></div>
 <textarea id="d-idea" rows="3" data-q="¿Cómo nació la idea?" placeholder="Tu respuesta"></textarea>
 </div>
 <h3 class="grupo reveal" data-grupo="El equipo">El equipo</h3>
 <div class="q reveal">
-<label for="d-equipo">¿Cuántas profesionales trabajan hoy en Guzel?</label>
+<label for="d-equipo">¿Cuántas profesionales trabajan hoy en Guzel?<span class="tilde" aria-hidden="true"></span></label>
 <p class="hint">Un número aproximado.</p>
 <div class="ej"><span>Ejemplo</span><p>Unas 60 entre las 14 sucursales.</p></div>
 <textarea id="d-equipo" rows="3" data-q="¿Cuántas profesionales trabajan hoy en Guzel?" placeholder="Tu respuesta"></textarea>
 </div>
 <div class="q reveal">
-<label for="d-formacion">¿Cómo se forma una profesional antes de atender?</label>
+<label for="d-formacion">¿Cómo se forma una profesional antes de atender?<span class="tilde" aria-hidden="true"></span></label>
 <p class="hint">Cuánto dura la capacitación y quién la da.</p>
 <div class="ej"><span>Ejemplo</span><p>Todas pasan por una capacitación interna de 3 meses, con práctica supervisada, antes de atender a una clienta.</p></div>
 <textarea id="d-formacion" rows="3" data-q="¿Cómo se forma una profesional antes de atender?" placeholder="Tu respuesta"></textarea>
 </div>
 <div class="q reveal">
-<label for="d-referente">¿A quién podemos citar como experta de Guzel?</label>
+<label for="d-referente">¿A quién podemos citar como experta de Guzel?<span class="tilde" aria-hidden="true"></span></label>
 <p class="hint">Nombre, cargo y años de experiencia. Las IA confían más en un texto cuando lo firma una persona.</p>
 <div class="ej"><span>Ejemplo</span><p>María Pérez, jefa de capacitación, 9 años haciendo threading.</p></div>
 <textarea id="d-referente" rows="3" data-q="¿A quién podemos citar como experta de Guzel?" placeholder="Tu respuesta"></textarea>
@@ -302,7 +356,7 @@
 <h3 class="grupo reveal" data-grupo="Cada servicio">Cada servicio</h3>
 <p class="nota reveal">Ya tenemos el nombre, el precio y los minutos de cada uno. Falta lo que solo ustedes saben. En cada casilla podés tocar «Poner la estructura» y completar.</p>
 <div class="q reveal">
-<label for="d-s-perfilado">Perfilado de cejas con hilo</label>
+<label for="d-s-perfilado">Perfilado de cejas con hilo<span class="tilde" aria-hidden="true"></span></label>
 <div class="ej"><span>Ejemplo</span><p>Dura: 3 a 4 semanas.<br>Cada cuánto volver: cada 3 o 4 semanas.<br>Cuidados después: no maquillar ni tomar sol en la zona por 24 horas.<br>No se recomienda si: la piel está irritada o lastimada.</p></div>
 <textarea id="d-s-perfilado" rows="5" data-q="Perfilado de cejas con hilo" data-esq="Dura:
 Cada cuánto volver:
@@ -311,7 +365,7 @@ No se recomienda si:" placeholder="Tu respuesta"></textarea>
 <button type="button" class="mini" data-esq-btn>Poner la estructura</button>
 </div>
 <div class="q reveal">
-<label for="d-s-laminado">Laminado de cejas</label>
+<label for="d-s-laminado">Laminado de cejas<span class="tilde" aria-hidden="true"></span></label>
 <textarea id="d-s-laminado" rows="5" data-q="Laminado de cejas" data-esq="Dura:
 Cada cuánto volver:
 Cuidados después:
@@ -319,7 +373,7 @@ No se recomienda si:" placeholder="Tu respuesta"></textarea>
 <button type="button" class="mini" data-esq-btn>Poner la estructura</button>
 </div>
 <div class="q reveal">
-<label for="d-s-alisado">Alisado de cejas</label>
+<label for="d-s-alisado">Alisado de cejas<span class="tilde" aria-hidden="true"></span></label>
 <textarea id="d-s-alisado" rows="5" data-q="Alisado de cejas" data-esq="Dura:
 Cada cuánto volver:
 Cuidados después:
@@ -327,7 +381,7 @@ No se recomienda si:" placeholder="Tu respuesta"></textarea>
 <button type="button" class="mini" data-esq-btn>Poner la estructura</button>
 </div>
 <div class="q reveal">
-<label for="d-s-tinte-cejas">Tinte de cejas</label>
+<label for="d-s-tinte-cejas">Tinte de cejas<span class="tilde" aria-hidden="true"></span></label>
 <textarea id="d-s-tinte-cejas" rows="5" data-q="Tinte de cejas" data-esq="Dura:
 Cada cuánto volver:
 Cuidados después:
@@ -335,7 +389,7 @@ No se recomienda si:" placeholder="Tu respuesta"></textarea>
 <button type="button" class="mini" data-esq-btn>Poner la estructura</button>
 </div>
 <div class="q reveal">
-<label for="d-s-decoloracion">Decoloración</label>
+<label for="d-s-decoloracion">Decoloración<span class="tilde" aria-hidden="true"></span></label>
 <textarea id="d-s-decoloracion" rows="5" data-q="Decoloración" data-esq="Dura:
 Cada cuánto volver:
 Cuidados después:
@@ -343,7 +397,7 @@ No se recomienda si:" placeholder="Tu respuesta"></textarea>
 <button type="button" class="mini" data-esq-btn>Poner la estructura</button>
 </div>
 <div class="q reveal">
-<label for="d-s-lifting">Lifting de pestañas</label>
+<label for="d-s-lifting">Lifting de pestañas<span class="tilde" aria-hidden="true"></span></label>
 <textarea id="d-s-lifting" rows="5" data-q="Lifting de pestañas" data-esq="Dura:
 Cada cuánto volver:
 Cuidados después:
@@ -351,7 +405,7 @@ No se recomienda si:" placeholder="Tu respuesta"></textarea>
 <button type="button" class="mini" data-esq-btn>Poner la estructura</button>
 </div>
 <div class="q reveal">
-<label for="d-s-tinte-pestanas">Tinte de pestañas</label>
+<label for="d-s-tinte-pestanas">Tinte de pestañas<span class="tilde" aria-hidden="true"></span></label>
 <textarea id="d-s-tinte-pestanas" rows="5" data-q="Tinte de pestañas" data-esq="Dura:
 Cada cuánto volver:
 Cuidados después:
@@ -359,7 +413,7 @@ No se recomienda si:" placeholder="Tu respuesta"></textarea>
 <button type="button" class="mini" data-esq-btn>Poner la estructura</button>
 </div>
 <div class="q reveal">
-<label for="d-s-shock">Shock de nutrición (cejas y pestañas)</label>
+<label for="d-s-shock">Shock de nutrición (cejas y pestañas)<span class="tilde" aria-hidden="true"></span></label>
 <textarea id="d-s-shock" rows="5" data-q="Shock de nutrición (cejas y pestañas)" data-esq="Dura:
 Cada cuánto volver:
 Cuidados después:
@@ -367,7 +421,7 @@ No se recomienda si:" placeholder="Tu respuesta"></textarea>
 <button type="button" class="mini" data-esq-btn>Poner la estructura</button>
 </div>
 <div class="q reveal">
-<label for="d-s-rostro">Bozo, mentón y rostro completo con hilo</label>
+<label for="d-s-rostro">Bozo, mentón y rostro completo con hilo<span class="tilde" aria-hidden="true"></span></label>
 <textarea id="d-s-rostro" rows="5" data-q="Bozo, mentón y rostro completo con hilo" data-esq="Dura:
 Cada cuánto volver:
 Cuidados después:
@@ -376,43 +430,52 @@ No se recomienda si:" placeholder="Tu respuesta"></textarea>
 </div>
 <h3 class="grupo reveal" data-grupo="Por qué Guzel">Por qué Guzel</h3>
 <div class="q reveal">
-<label for="d-hilo">¿Por qué hilo y no cera o pinza?</label>
+<label for="d-hilo">¿Por qué hilo y no cera o pinza?<span class="tilde" aria-hidden="true"></span></label>
 <p class="hint">Las ventajas que le explican a una clienta nueva.</p>
 <div class="ej"><span>Ejemplo</span><p>El hilo saca el vello de raíz sin tirar de la piel, así que no irrita ni mancha. Permite definir la forma con más precisión que la cera.</p></div>
 <textarea id="d-hilo" rows="3" data-q="¿Por qué hilo y no cera o pinza?" placeholder="Tu respuesta"></textarea>
 </div>
 <div class="q reveal">
-<label for="d-refectocil">¿Por qué trabajan con RefectoCil?</label>
+<label for="d-refectocil">¿Por qué trabajan con RefectoCil?<span class="tilde" aria-hidden="true"></span></label>
 <div class="ej"><span>Ejemplo</span><p>Es la marca profesional que usan los salones de Europa. Los tintes duran más y están probados para la zona de los ojos.</p></div>
 <textarea id="d-refectocil" rows="3" data-q="¿Por qué trabajan con RefectoCil?" placeholder="Tu respuesta"></textarea>
 </div>
 <div class="q reveal">
-<label for="d-valoran">¿Qué es lo que más valoran las clientas?</label>
+<label for="d-valoran">¿Qué es lo que más valoran las clientas?<span class="tilde" aria-hidden="true"></span></label>
 <p class="hint">Lo que más escuchan en el local.</p>
 <div class="ej"><span>Ejemplo</span><p>Que no hace falta turno, que en 10 minutos están listas y que el resultado se ve natural.</p></div>
 <textarea id="d-valoran" rows="3" data-q="¿Qué es lo que más valoran las clientas?" placeholder="Tu respuesta"></textarea>
 </div>
 <div class="q reveal">
-<label for="d-edad">¿Atienden a menores y a hombres? ¿Con alguna condición?</label>
+<label for="d-edad">¿Atienden a menores y a hombres? ¿Con alguna condición?<span class="tilde" aria-hidden="true"></span></label>
 <div class="ej"><span>Ejemplo</span><p>Atendemos a hombres en todas las sucursales. A menores de 16, con un adulto que acompañe.</p></div>
 <textarea id="d-edad" rows="3" data-q="¿Atienden a menores y a hombres? ¿Con alguna condición?" placeholder="Tu respuesta"></textarea>
 </div>
 <h3 class="grupo reveal" data-grupo="Prensa y aclaraciones">Prensa y aclaraciones</h3>
 <div class="q reveal">
-<label for="d-prensa">Notas, premios o menciones de Guzel</label>
+<label for="d-prensa">Notas, premios o menciones de Guzel<span class="tilde" aria-hidden="true"></span></label>
 <p class="hint">Pegá los links que tengas. Si no hay, dejalo vacío.</p>
 <div class="ej"><span>Ejemplo</span><p>Nota en La Nación, 2019: https://…</p></div>
 <textarea id="d-prensa" rows="3" data-q="Notas, premios o menciones de Guzel" placeholder="Tu respuesta"></textarea>
 </div>
 <div class="q reveal">
-<label for="d-no-decir">¿Hay algo que no hay que decir de Guzel, o que la gente suele confundir?</label>
+<label for="d-no-decir">¿Hay algo que no hay que decir de Guzel, o que la gente suele confundir?<span class="tilde" aria-hidden="true"></span></label>
 <div class="ej"><span>Ejemplo</span><p>No hacemos extensiones de pestañas ni microblading. No somos una depiladora: solo trabajamos el rostro.</p></div>
 <textarea id="d-no-decir" rows="3" data-q="¿Hay algo que no hay que decir de Guzel, o que la gente suele confundir?" placeholder="Tu respuesta"></textarea>
 </div>
-<div class="acciones reveal">
-  <p class="cuenta" aria-live="polite"><b data-n>0</b> de <span data-t>0</span> respondidas <span class="ok" data-ok hidden></span></p>
-  <p class="hint">No hace falta enviar nada: se guarda solo y Martín lo ve a medida que se completa.</p>
-  <button type="button" class="copia" data-bajar>Descargar una copia en Word</button>
+<div class="fin reveal">
+  <div class="anillo">
+    <svg viewBox="0 0 80 80" aria-hidden="true"><circle class="pista" cx="40" cy="40" r="34"/><circle class="avance" data-anillo cx="40" cy="40" r="34" pathLength="100"/></svg>
+    <b data-n>0</b>
+  </div>
+  <div class="fin-txt">
+    <p class="cuenta" aria-live="polite"><span class="sr">Respondidas: </span>de <span data-t>0</span> respondidas</p>
+    <p class="hint" data-msg></p>
+    <div class="fin-acc">
+      <button type="button" class="btn" data-ir>Ir a la que falta ↓</button>
+      <button type="button" class="copia" data-bajar>Descargar una copia en Word</button>
+    </div>
+  </div>
 </div>
 </div></section>
 
@@ -424,69 +487,78 @@ No se recomienda si:" placeholder="Tu respuesta"></textarea>
 <p class="lead reveal" style="margin-top:18px">Todo lo que ya tengan publicado o armado sirve. Si hay más material del que entra acá, mejor: mandalo igual.</p>
 <h3 class="grupo reveal" data-grupo="La marca">La marca</h3>
 <div class="q reveal">
-<label for="m-nombres">¿Cómo nombra la marca cada servicio? ¿Qué palabras no se usan?</label>
+<label for="m-nombres">¿Cómo nombra la marca cada servicio? ¿Qué palabras no se usan?<span class="tilde" aria-hidden="true"></span></label>
 <div class="ej"><span>Ejemplo</span><p>Decimos «perfilado con hilo», nunca «depilación de cejas». Decimos «clientas y clientes», no «pacientes».</p></div>
 <textarea id="m-nombres" rows="3" data-q="¿Cómo nombra la marca cada servicio? ¿Qué palabras no se usan?" placeholder="Tu respuesta"></textarea>
 </div>
 <div class="q reveal">
-<label for="m-frase">¿Cómo describen a Guzel en una frase?</label>
+<label for="m-frase">¿Cómo describen a Guzel en una frase?<span class="tilde" aria-hidden="true"></span></label>
 <p class="hint">La que usarían en la biografía de Instagram.</p>
 <div class="ej"><span>Ejemplo</span><p>El primer brow bar de Argentina: cejas y pestañas en 10 minutos, sin turno.</p></div>
 <textarea id="m-frase" rows="3" data-q="¿Cómo describen a Guzel en una frase?" placeholder="Tu respuesta"></textarea>
 </div>
 <div class="q reveal">
-<label for="m-tono">¿Cómo le habla Guzel a su público?</label>
+<label for="m-tono">¿Cómo le habla Guzel a su público?<span class="tilde" aria-hidden="true"></span></label>
 <div class="ej"><span>Ejemplo</span><p>De vos, cercano y simple. Sin tecnicismos y sin diminutivos.</p></div>
 <textarea id="m-tono" rows="3" data-q="¿Cómo le habla Guzel a su público?" placeholder="Tu respuesta"></textarea>
 </div>
 <h3 class="grupo reveal" data-grupo="Lo que ya existe">Lo que ya existe</h3>
 <p class="nota reveal">Las IA no leen solo la web: también miran redes, videos y notas. Todo lo que ya esté publicado suma.</p>
 <div class="q reveal">
-<label for="m-cuentas">Cuentas oficiales</label>
+<label for="m-cuentas">Cuentas oficiales<span class="tilde" aria-hidden="true"></span></label>
 <p class="hint">Instagram, TikTok, YouTube, Facebook y cualquier otra. Con el link.</p>
 <div class="ej"><span>Ejemplo</span><p>Instagram: https://instagram.com/…<br>TikTok: https://tiktok.com/@…</p></div>
 <textarea id="m-cuentas" rows="3" data-q="Cuentas oficiales" placeholder="Tu respuesta"></textarea>
 </div>
 <div class="q reveal">
-<label for="m-videos">Videos o posteos donde se explique un servicio</label>
+<label for="m-videos">Videos o posteos donde se explique un servicio<span class="tilde" aria-hidden="true"></span></label>
 <p class="hint">Los que mejor funcionaron. Con el link.</p>
 <div class="ej"><span>Ejemplo</span><p>Reel «Qué es el laminado de cejas»: https://…</p></div>
 <textarea id="m-videos" rows="3" data-q="Videos o posteos donde se explique un servicio" placeholder="Tu respuesta"></textarea>
 </div>
 <div class="q reveal">
-<label for="m-colaboraciones">Colaboraciones, influencers o notas donde aparezca Guzel</label>
+<label for="m-colaboraciones">Colaboraciones, influencers o notas donde aparezca Guzel<span class="tilde" aria-hidden="true"></span></label>
 <div class="ej"><span>Ejemplo</span><p>Colaboración con @… en marzo de 2026: https://…</p></div>
 <textarea id="m-colaboraciones" rows="3" data-q="Colaboraciones, influencers o notas donde aparezca Guzel" placeholder="Tu respuesta"></textarea>
 </div>
 <h3 class="grupo reveal" data-grupo="Pruebas">Pruebas</h3>
 <div class="q reveal">
-<label for="m-testimonios">Testimonios o reseñas que se puedan citar</label>
+<label for="m-testimonios">Testimonios o reseñas que se puedan citar<span class="tilde" aria-hidden="true"></span></label>
 <p class="hint">El texto y el nombre de pila. Tres o cuatro alcanzan.</p>
 <div class="ej"><span>Ejemplo</span><p>«Entré sin turno y en 10 minutos salí con las cejas perfectas.» Sofía, Palermo.</p></div>
 <textarea id="m-testimonios" rows="3" data-q="Testimonios o reseñas que se puedan citar" placeholder="Tu respuesta"></textarea>
 </div>
 <div class="q reveal">
-<label for="m-fotos">Fotos de antes y después</label>
+<label for="m-fotos">Fotos de antes y después<span class="tilde" aria-hidden="true"></span></label>
 <p class="hint">No hace falta subirlas acá: pegá el link a la carpeta donde están.</p>
 <div class="ej"><span>Ejemplo</span><p>Carpeta de Drive: https://…</p></div>
 <textarea id="m-fotos" rows="3" data-q="Fotos de antes y después" placeholder="Tu respuesta"></textarea>
 </div>
 <h3 class="grupo reveal" data-grupo="Lo que buscan las clientas">Lo que buscan las clientas</h3>
 <div class="q reveal">
-<label for="m-preguntas">¿Qué preguntan más por Instagram o en los comentarios?</label>
+<label for="m-preguntas">¿Qué preguntan más por Instagram o en los comentarios?<span class="tilde" aria-hidden="true"></span></label>
 <p class="hint">Ya tenemos las preguntas que le hacen a Sofi. Sumá las que veas vos en redes.</p>
 <div class="ej"><span>Ejemplo</span><p>Si duele, cuánto dura el laminado y si pueden ir embarazadas.</p></div>
 <textarea id="m-preguntas" rows="3" data-q="¿Qué preguntan más por Instagram o en los comentarios?" placeholder="Tu respuesta"></textarea>
 </div>
 <div class="q reveal">
-<label for="m-zonas">¿Hay sucursales o servicios que quieran empujar más?</label>
+<label for="m-zonas">¿Hay sucursales o servicios que quieran empujar más?<span class="tilde" aria-hidden="true"></span></label>
 <div class="ej"><span>Ejemplo</span><p>Las dos sucursales nuevas y el lifting de pestañas.</p></div>
 <textarea id="m-zonas" rows="3" data-q="¿Hay sucursales o servicios que quieran empujar más?" placeholder="Tu respuesta"></textarea>
 </div>
-<div class="acciones reveal">
-  <p class="cuenta" aria-live="polite"><b data-n>0</b> de <span data-t>0</span> respondidas <span class="ok" data-ok hidden></span></p>
-  <p class="hint">No hace falta enviar nada: se guarda solo y Martín lo ve a medida que se completa.</p>
-  <button type="button" class="copia" data-bajar>Descargar una copia en Word</button>
+<div class="fin reveal">
+  <div class="anillo">
+    <svg viewBox="0 0 80 80" aria-hidden="true"><circle class="pista" cx="40" cy="40" r="34"/><circle class="avance" data-anillo cx="40" cy="40" r="34" pathLength="100"/></svg>
+    <b data-n>0</b>
+  </div>
+  <div class="fin-txt">
+    <p class="cuenta" aria-live="polite"><span class="sr">Respondidas: </span>de <span data-t>0</span> respondidas</p>
+    <p class="hint" data-msg></p>
+    <div class="fin-acc">
+      <button type="button" class="btn" data-ir>Ir a la que falta ↓</button>
+      <button type="button" class="copia" data-bajar>Descargar una copia en Word</button>
+    </div>
+  </div>
 </div>
 </div></section>
 
@@ -531,19 +603,62 @@ No se recomienda si:" placeholder="Tu respuesta"></textarea>
     var local = location.hostname === 'localhost' && new URLSearchParams(location.search).get('api');
     var API = local || 'https://guzel-datos.mflowsuite.workers.dev';
     var KEY = 'guzel-ia:';
+    var quieto = matchMedia('(prefers-reduced-motion: reduce)').matches;
     function leer(id) { try { return localStorage.getItem(KEY + id) || ''; } catch (e) { return ''; } }
     function guardar(id, v) { try { v ? localStorage.setItem(KEY + id, v) : localStorage.removeItem(KEY + id); } catch (e) {} }
     function esc(t) { return t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 
+    // Barra de arriba: acompaña mientras se completa un cuestionario y muestra el avance del que está en pantalla.
+    var barra = document.getElementById('barra');
+    var bn = barra.querySelector('[data-bn]'), bt = barra.querySelector('[data-bt]'), bok = barra.querySelector('[data-bok]');
+    var linea = barra.querySelector('[data-bl]'), bir = barra.querySelector('[data-ir]');
+    var estados = {}, activo = null;
+    function pintarBarra() {
+      var e = estados[activo];
+      barra.classList.toggle('on', !!e);
+      if (!e) return;
+      if (bn.textContent !== String(e.n) && bn.textContent !== '' && !quieto) bn.animate([{ transform: 'scale(1.35)' }, { transform: 'scale(1)' }], { duration: 250, easing: 'cubic-bezier(0.23, 1, 0.32, 1)' });
+      bn.textContent = e.n; bt.textContent = e.total;
+      bok.textContent = e.aviso; bok.dataset.tipo = e.tipo;
+      linea.style.transform = 'scaleX(' + (e.total ? e.n / e.total : 0) + ')';
+      barra.classList.toggle('completo', e.n === e.total);
+      bir.hidden = e.n === e.total;
+      barra.querySelectorAll('[data-tab]').forEach(function (a) { a.classList.toggle('on', a.dataset.tab === activo); });
+    }
+    bir.addEventListener('click', function () { if (estados[activo]) estados[activo].ir(); });
+
     document.querySelectorAll('[data-form]').forEach(function (form) {
       var id = form.dataset.form, campos = [].slice.call(form.querySelectorAll('textarea'));
-      var n = form.querySelector('[data-n]'), ok = form.querySelector('[data-ok]');
+      var n = form.querySelector('[data-n]'), anillo = form.querySelector('[data-anillo]'), msg = form.querySelector('[data-msg]');
+      var irBtn = form.querySelector('.fin [data-ir]'), fin = form.querySelector('.fin');
       var ultimo = 0, primera = true, relojes = {};
+      var e = estados[id] = { n: 0, total: campos.length, aviso: '', tipo: '', ir: irALaQueFalta };
       form.querySelector('[data-t]').textContent = campos.length;
-      function contar() { n.textContent = campos.filter(function (c) { var v = c.value.trim(); return v && v !== (c.dataset.esq || '').trim(); }).length; }
-      function aviso(txt) { ok.textContent = '· ' + txt; ok.hidden = false; }
+
+      function respondida(c) { var v = c.value.trim(); return !!v && v !== (c.dataset.esq || '').trim(); }
+      function contar() {
+        var antes = e.n;
+        campos.forEach(function (c) { c.closest('.q').classList.toggle('hecha', respondida(c)); });
+        e.n = campos.filter(respondida).length;
+        n.textContent = e.n;
+        anillo.style.strokeDashoffset = 100 - (e.total ? (e.n / e.total) * 100 : 0);
+        var completo = e.n === e.total;
+        fin.classList.toggle('completo', completo);
+        irBtn.hidden = completo;
+        msg.textContent = completo ? 'Completaste todo. Gracias: con esto armamos la guía.' : 'No hace falta enviar nada: se guarda solo y Martín lo ve a medida que se completa.';
+        if (completo && antes < e.total && antes > 0 && !quieto) fin.querySelector('.anillo').animate([{ transform: 'scale(1)' }, { transform: 'scale(1.12)' }, { transform: 'scale(1)' }], { duration: 500, easing: 'cubic-bezier(0.23, 1, 0.32, 1)' });
+        pintarBarra();
+      }
+      function aviso(txt, tipo) { e.aviso = txt; e.tipo = tipo; pintarBarra(); }
       function sucio(c, v) { if (v === undefined) return !!leer('s:' + c.id); guardar('s:' + c.id, v ? '1' : ''); }
       function pendientes() { return campos.filter(function (c) { return sucio(c); }); }
+      function irALaQueFalta() {
+        var c = campos.filter(function (x) { return !respondida(x); })[0];
+        if (!c) return;
+        c.closest('.q').scrollIntoView({ behavior: quieto ? 'auto' : 'smooth', block: 'start' });
+        c.focus({ preventScroll: true });
+      }
+      irBtn.addEventListener('click', irALaQueFalta);
 
       function subir(c) {
         var v = c.value;
@@ -551,9 +666,9 @@ No se recomienda si:" placeholder="Tu respuesta"></textarea>
           .then(function (r) { if (!r.ok) throw 0; return r.json(); })
           .then(function () {
             if (c.value === v) sucio(c, false);
-            aviso(pendientes().length ? 'Guardando…' : 'Guardado');
+            pendientes().length ? aviso('Guardando…', 'espera') : aviso('Guardado', 'ok');
           })
-          .catch(function () { aviso('Sin conexión: quedó guardado en este dispositivo'); });
+          .catch(function () { aviso('Sin conexión', 'mal'); });
       }
       // Trae lo que cambió en el servidor. Lo que esta persona escribió y todavía no subió no se pisa.
       function bajar() {
@@ -581,7 +696,7 @@ No se recomienda si:" placeholder="Tu respuesta"></textarea>
       campos.forEach(function (c) {
         c.value = leer(c.id);
         c.addEventListener('input', function () {
-          guardar(c.id, c.value); sucio(c, true); contar(); aviso('Guardando…');
+          guardar(c.id, c.value); sucio(c, true); contar(); aviso('Guardando…', 'espera');
           clearTimeout(relojes[c.id]); relojes[c.id] = setTimeout(function () { subir(c); }, 1500);
         });
         c.addEventListener('blur', function () { if (sucio(c)) { clearTimeout(relojes[c.id]); subir(c); } });
@@ -591,6 +706,12 @@ No se recomienda si:" placeholder="Tu respuesta"></textarea>
       setInterval(function () { if (document.visibilityState === 'visible') bajar(); }, 20000);
       document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') bajar(); });
 
+      // El cuestionario que cruza la mitad de la pantalla es el que muestra la barra.
+      new IntersectionObserver(function (es) {
+        es.forEach(function (x) { if (x.isIntersecting) activo = id; else if (activo === id) activo = null; });
+        pintarBarra();
+      }, { rootMargin: '-50% 0px -50% 0px' }).observe(form);
+
       form.querySelectorAll('[data-esq-btn]').forEach(function (b) {
         b.addEventListener('click', function () {
           var c = b.previousElementSibling;
@@ -599,17 +720,13 @@ No se recomienda si:" placeholder="Tu respuesta"></textarea>
         });
       });
 
-      // Recorre grupos y preguntas en orden, para armar la copia en Word.
-      function recorrer(fn) {
-        form.querySelectorAll('[data-grupo], textarea').forEach(function (el) {
-          el.dataset.grupo ? fn('g', el.dataset.grupo) : fn('q', el.dataset.q, el.value.trim());
-        });
-      }
+      // Copia en Word: recorre grupos y preguntas en orden.
       form.querySelector('[data-bajar]').addEventListener('click', function () {
         var h = '<html><head><meta charset="utf-8"><title>Guzel</title></head><body style="font-family:Calibri,Arial,sans-serif">' +
           '<h1>Guzel · ' + esc(form.dataset.titulo) + '</h1>';
-        recorrer(function (k, a, b) {
-          h += k === 'g' ? '<h2>' + esc(a) + '</h2>' : '<p><b>' + esc(a) + '</b></p><p>' + (b ? esc(b).replace(/\n/g, '<br>') : '&nbsp;<br>&nbsp;') + '</p>';
+        form.querySelectorAll('[data-grupo], textarea').forEach(function (el) {
+          var b = el.value ? el.value.trim() : '';
+          h += el.dataset.grupo ? '<h2>' + esc(el.dataset.grupo) + '</h2>' : '<p><b>' + esc(el.dataset.q) + '</b></p><p>' + (b ? esc(b).replace(/\n/g, '<br>') : '&nbsp;<br>&nbsp;') + '</p>';
         });
         var a = document.createElement('a');
         a.href = URL.createObjectURL(new Blob(['﻿' + h + '</body></html>'], { type: 'application/msword' }));

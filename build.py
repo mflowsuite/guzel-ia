@@ -96,7 +96,7 @@ def esc(t):
 
 def campo(q):
     qid, preg, ayuda, ej, esq = q
-    out = [f'<div class="q reveal">', f'<label for="{qid}">{esc(preg)}</label>']
+    out = [f'<div class="q reveal">', f'<label for="{qid}">{esc(preg)}<span class="tilde" aria-hidden="true"></span></label>']
     if ayuda:
         out.append(f'<p class="hint">{esc(ayuda)}</p>')
     if ej:
@@ -118,10 +118,19 @@ def cuestionario(fid, titulo, kicker, intro, grupos, archivo):
         if nota:
             out.append(f'<p class="nota reveal">{esc(nota)}</p>')
         out += [campo(q) for q in qs]
-    out.append('''<div class="acciones reveal">
-  <p class="cuenta" aria-live="polite"><b data-n>0</b> de <span data-t>0</span> respondidas <span class="ok" data-ok hidden></span></p>
-  <p class="hint">No hace falta enviar nada: se guarda solo y Martín lo ve a medida que se completa.</p>
-  <button type="button" class="copia" data-bajar>Descargar una copia en Word</button>
+    out.append('''<div class="fin reveal">
+  <div class="anillo">
+    <svg viewBox="0 0 80 80" aria-hidden="true"><circle class="pista" cx="40" cy="40" r="34"/><circle class="avance" data-anillo cx="40" cy="40" r="34" pathLength="100"/></svg>
+    <b data-n>0</b>
+  </div>
+  <div class="fin-txt">
+    <p class="cuenta" aria-live="polite"><span class="sr">Respondidas: </span>de <span data-t>0</span> respondidas</p>
+    <p class="hint" data-msg></p>
+    <div class="fin-acc">
+      <button type="button" class="btn" data-ir>Ir a la que falta ↓</button>
+      <button type="button" class="copia" data-bajar>Descargar una copia en Word</button>
+    </div>
+  </div>
 </div>''')
     out.append('</div></section>')
     return '\n'.join(out)
@@ -129,6 +138,8 @@ def cuestionario(fid, titulo, kicker, intro, grupos, archivo):
 
 CSS = '''
   /* Página de datos para las IA */
+  :root { --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1); }
+  [hidden] { display: none !important; }
   .wrap.narrow { width: min(820px, 100% - 32px); }
   .hero.small { min-height: 68svh; }
   .hero.small .content { padding-top: 120px; }
@@ -160,15 +171,57 @@ CSS = '''
   textarea { display: block; width: 100%; margin-top: 12px; padding: 14px 16px; border-radius: 16px; border: 1px solid #cfc7b8; background: #fff; font: inherit; color: var(--ink); resize: vertical; min-height: 96px; }
   textarea:focus-visible { outline: 3px solid var(--teal); outline-offset: 1px; border-color: var(--teal-deep); }
   .mini { margin-top: 8px; min-height: 40px; padding: 0 16px; border-radius: 999px; border: 1px solid var(--teal-deep); background: transparent; color: var(--teal-deep); font: inherit; font-weight: 700; font-size: .9rem; cursor: pointer; }
-  .acciones { margin-top: 56px; padding: 26px; border-radius: 24px; background: #fff; border: 1px solid var(--line); position: sticky; bottom: 12px; box-shadow: 0 18px 40px -24px rgba(0,0,0,.4); }
-  .cuenta { font-weight: 600; }
-  .cuenta b { font-family: var(--display); font-weight: 400; font-size: 1.7rem; color: var(--teal-deep); }
-  .cuenta .ok { color: var(--teal-deep); }
-  .copia { margin-top: 10px; padding: 8px 0; border: 0; background: none; font: inherit; font-size: .9rem; font-weight: 600; color: var(--teal-deep); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .form { scroll-margin-top: 56px; }
+  .q { scroll-margin-top: 76px; }
+  .tilde { display: inline-block; width: 22px; height: 22px; margin-left: 8px; vertical-align: -4px; border-radius: 50%; background: var(--teal-deep) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 12.5l4 4 8-9'/%3E%3C/svg%3E") center / 14px no-repeat; opacity: 0; transform: scale(.6); transition: opacity .2s var(--ease-out), transform .2s var(--ease-out); }
+  .q.hecha .tilde { opacity: 1; transform: none; }
+  .q.hecha textarea { border-color: var(--teal); }
+
+  .barra { position: fixed; top: 0; left: 0; right: 0; z-index: 50; background: rgba(255,253,249,.94); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow: 0 8px 24px -18px rgba(0,0,0,.45); transform: translateY(-110%); transition: transform .25s var(--ease-out); }
+  .barra.on { transform: none; }
+  .barra-in { width: min(820px, 100% - 24px); margin-inline: auto; height: 52px; display: flex; align-items: center; gap: 12px; }
+  .tabs { display: flex; gap: 4px; padding: 3px; border-radius: 999px; background: var(--cream); margin-right: auto; }
+  .tabs a { padding: 6px 14px; border-radius: 999px; font-size: .85rem; font-weight: 700; color: var(--ash); text-decoration: none; transition: background-color .2s ease, color .2s ease; }
+  .tabs a.on { background: var(--teal-deep); color: #fff; }
+  .barra-ok { font-size: .82rem; font-weight: 700; color: var(--teal-deep); white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; }
+  .barra-ok::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--teal); }
+  .barra-ok:empty { display: none; }
+  .barra-ok[data-tipo="espera"] { color: var(--ash); }
+  .barra-ok[data-tipo="espera"]::before { background: var(--butter); }
+  .barra-ok[data-tipo="mal"] { color: #a13a2a; }
+  .barra-ok[data-tipo="mal"]::before { background: #e0705c; }
+  .barra-n { font-size: .9rem; font-weight: 600; white-space: nowrap; }
+  .barra-n b { display: inline-block; font-family: var(--display); font-weight: 400; font-size: 1.35rem; color: var(--teal-deep); }
+  .barra-ir { min-height: 36px; padding: 0 14px; border-radius: 999px; border: 0; background: var(--pink); color: var(--ink); font: inherit; font-size: .85rem; font-weight: 700; cursor: pointer; white-space: nowrap; }
+  .barra-linea { height: 4px; background: var(--line); }
+  .barra-linea span { display: block; height: 100%; background: linear-gradient(90deg, var(--teal-deep), var(--teal)); transform: scaleX(0); transform-origin: left; transition: transform .5s var(--ease-in-out); }
+  .barra.completo .barra-linea span { background: linear-gradient(90deg, var(--teal-deep), var(--teal), var(--pink)); }
+
+  .fin { margin-top: 64px; padding: 28px; border-radius: 28px; background: #fff; border: 1px solid var(--line); box-shadow: 0 24px 50px -34px rgba(0,0,0,.4); display: grid; grid-template-columns: auto 1fr; gap: 24px; align-items: center; }
+  .anillo { position: relative; width: 112px; height: 112px; }
+  .anillo svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+  .anillo circle { fill: none; stroke-width: 7; }
+  .anillo .pista { stroke: var(--cream); }
+  .anillo .avance { stroke: var(--teal-deep); stroke-linecap: round; stroke-dasharray: 100; stroke-dashoffset: 100; transition: stroke-dashoffset .6s var(--ease-in-out), stroke .3s ease; }
+  .anillo b { position: absolute; inset: 0; display: grid; place-items: center; font-family: var(--display); font-weight: 400; font-size: 2.4rem; color: var(--teal-deep); }
+  .fin.completo .anillo .avance { stroke: var(--teal); }
+  .fin .cuenta { font-weight: 700; font-size: 1.1rem; }
+  .fin-acc { margin-top: 14px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 18px; }
+  .fin-acc .btn { border: 0; font: inherit; font-weight: 700; cursor: pointer; min-height: 44px; }
+  .copia { padding: 8px 0; border: 0; background: none; font: inherit; font-size: .9rem; font-weight: 600; color: var(--teal-deep); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+  :is(.barra-ir, .copia, .tabs a, .fin-acc .btn):focus-visible { outline: 3px solid var(--teal); outline-offset: 2px; }
+  @media (prefers-reduced-motion: reduce) { .barra, .barra-linea span, .tilde, .anillo .avance { transition-duration: .01s; } }
   .aviso { margin-top: 26px; padding: 14px 18px; border-radius: 14px; background: #fff; border: 1px dashed #cfc7b8; color: var(--ash); font-size: .95rem; }
   @media (max-width: 900px) { .marcha, .pasos { grid-template-columns: 1fr; } }
   @media (max-width: 560px) {
-    .acciones { padding: 18px; position: static; }
+    .fin { grid-template-columns: 1fr; justify-items: center; text-align: center; padding: 24px 20px; }
+    .fin-acc { justify-content: center; }
+    .fin-acc .btn { width: 100%; justify-content: center; }
+    .barra-in { gap: 8px; }
+    .tabs a { padding: 6px 10px; font-size: .78rem; }
+    .barra-ok { font-size: 0; gap: 0; }
+    .barra-ir { padding: 0 10px; font-size: .78rem; }
     .quien .btn { width: 100%; justify-content: center; }
   }
 '''
@@ -209,6 +262,16 @@ page = f'''<!doctype html>
     </div>
   </div>
 </header>
+
+<nav class="barra" id="barra" aria-label="Avance del cuestionario">
+  <div class="barra-in">
+    <div class="tabs"><a href="#direccion" data-tab="direccion">Dirección</a><a href="#marketing" data-tab="marketing">Marketing</a></div>
+    <span class="barra-ok" data-bok aria-hidden="true"></span>
+    <p class="barra-n" aria-hidden="true"><b data-bn></b> de <span data-bt>0</span></p>
+    <button type="button" class="barra-ir" data-ir aria-label="Ir a la primera pregunta sin responder">Falta <span aria-hidden="true">↓</span></button>
+  </div>
+  <div class="barra-linea" aria-hidden="true"><span data-bl></span></div>
+</nav>
 
 <main>
 
