@@ -600,8 +600,8 @@ No se recomienda si:" placeholder="Tu respuesta"></textarea>
   // pregunta, así la ven todas desde cualquier navegador. localStorage queda como copia en el dispositivo: sirve sin
   // conexión, y lo que no se pudo subir (marcado con «s:») se sube cuando vuelve.
   (function () {
-    var local = location.hostname === 'localhost' && new URLSearchParams(location.search).get('api');
-    var API = local || 'https://guzel-datos.mflowsuite.workers.dev';
+    // En localhost nunca se escribe en la base real: se usa el Worker local (cf dev) u otro que se pase con ?api=.
+    var API = location.hostname === 'localhost' ? new URLSearchParams(location.search).get('api') || 'http://localhost:8787' : 'https://guzel-datos.mflowsuite.workers.dev';
     var KEY = 'guzel-ia:';
     var quieto = matchMedia('(prefers-reduced-motion: reduce)').matches;
     function leer(id) { try { return localStorage.getItem(KEY + id) || ''; } catch (e) { return ''; } }
